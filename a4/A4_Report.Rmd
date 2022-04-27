@@ -1,0 +1,121 @@
+---
+title: "Relationships between Pattern Construction time and Field Dependence in Primary School Children"
+author: "Yohen Thounaojam"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+
+# suppress-bibliography: false
+output: 
+  pdf_document:
+    citation_package: natbib
+bibliography: references.bib
+csl: asa.csl
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+# Executive Summary
+
+This report is a graphical exploratory analysis of a the time taken to complete a pattern construction activity by a small sample of two experimental groups of primary school children.
+
+The experimental groups differed in the instructions for the task: the 'row' group (start pattern construction with a row of three blocks) and the 'corner' group (start pattern constriction with a corner of three blocks).
+
+The analysis indicates that the 'row' group had a higher average completion time than the 'corner' group. Moreover, there 'completion time' of the test is not affected by the child's EFT.
+
+# Data Description
+
+The data set used in this report comes from a sample of 24 primary school children [@aitkin2005statistical]. Each child completed the Embedded Figures Test (EFT), which measures field dependence \footnote{The extent to which a person can abstract the logical structure of a problem from its context.}.
+
+The children were divided into two instructional groups for completing the pattern construction activity: Row Group \footnote{Were told to start with a row of three blocks.} and Corner Group \footnote{Were told to start with a corner of three blocks.}
+
+Then, they were timed as they constructed a 3x3 pattern from nine colored blocks, taken from the Wechsler Intelligence Scale for Children (WISC) [see @hothorn2014handbook, p.66].
+
+The data columns recorded are:
+
+-   group: row, corner
+-   time: completion time of pattern construction in seconds
+-   EFT: Embedded Figures Test score measuring field dependence
+
+\newpage
+
+# Objective
+
+The data collected on the 24 children will be used to find relationships between their ability to quickly complete the pattern completion task from the WISC and their EFT scores which measure their field dependence. Specifically, the experimenter was interested in answers to the following questions:
+
+1.  Did the different instructions produce any change in the average time to complete the pattern?
+2.  Was this time affected by field dependence?
+
+# Methods
+
+Two graphical techniques will be employed in this report: box-plots and scatter-plots.
+
+Box-plots are widely used for displaying basic distributional features of univariate data, but they can be extended to multivariate settings as well if they are placed side-by-side. In our report we will be using Side-by-side Box-plots will be used to compare the completion time between the two instructional groups.
+
+```{r boxEFT, echo=FALSE, fig.cap = "A) Side-by-side boxplots of the completion for row and corner groups. B) Plot of averge completion time by groups."}
+data("EFT", package = "HSAUR3")
+layout(matrix(c(1,2,1,3), nrow = 1, ncol = 2, byrow = TRUE))
+
+boxplot(time ~ group, data = EFT, 
+        xlab = "Instruction Group",
+        ylab = "Time in Seconds",
+        varwidth = TRUE,
+        main = "Fig 1.A")
+EFT_means <- aggregate(time ~ group, EFT, mean)
+plot(as.factor(EFT_means$group), EFT_means$time, xlab= "Instruction Group", ylab="Average Time in Seconds", main="Fig 1.B")
+```
+
+\newpage
+
+In general, Scatter plots are useful for displaying bivariate data. Hence, we will be using a Scatter-plot to compare the relationship between the complete time and EFT scores.
+
+```{r scatter, echo=FALSE, fig.cap = "Scatterplot of time and EFT with a regression line for row and corner groups."}
+psymb <- as.numeric(EFT$group)
+plot(time ~ EFT, data = EFT, pch=psymb, main="Scatter Plot: time ~ EFT")
+legend("topleft", legend = levels(EFT$group),
+       pch = c(1,2), bty = "n")
+abline(lm(time ~ EFT, data= EFT))
+```
+
+Some basic ideas of the relationship between the two variables in the scatter-plot can be obtained from the regression line in Fig. 2. However, to get a deeper understanding of how significant a relationship is, we will also be using the *Pearson's Product-Moment Correlation Test*. The results from this correlation test can be used to check the significance of the relationship between time and EFT.
+
+```{r, echo=FALSE}
+cor.test(~ time + EFT, data = EFT)
+```
+
+**Fig. 3**: Pearson's Product-Moment Correlation test between time and EFT.
+
+\newpage
+
+# Results and Discussion
+
+In Figure 1.A, we observe that the the max, min values of completion time in seconds for row and corner instructional groups are fairly similar. However, in Figure 1.B, their average completion times vary drastically. We also notice that there is one single outlier for the row group.
+
+Then, the regression line in Figure 2 tells us that there is a positive correlation between time and EFT; as EFT increases, time of completion increases. But when we look closer, we notice that the data points in the scatter-plot are very spread out and do not follow the line strictly. This begs the question of how significant this relationship of positive correlation really is.
+
+To answer that, we conducted a Pearson's product-moment correlation test between the time and EFT variables, see Figure 3. We obtained a correlation coefficient of 0.547. We will further discuss what this implies in the following subsections.
+
+## Did the different instructions produce any change in the average time to complete the pattern?
+
+From the average time plot in Figure 1.B, we can conclude that the row group had a higher average completion time by \~50 seconds. This means that children instructed to start the pattern completion from the row took longer on average than those who were instructed to start at the corner.
+
+## Was this time affected by field dependence?
+
+To know if the time of completion was affected by the field dependence of the children, we compare the time and EFT scores in Figure 2. As discussed above, we see a positive correlation between time and EFT score.
+
+However, from the correlation coefficient of **0.547** from Figure 3, we can infer that there only a very slightly moderate to medium correlation. This is not significant enough to say the EFT score (field dependence) affected the average completion times.
+
+# Conclusion
+
+The conclusions of this analyses are short and can be answered in just two lines:
+
+1.  Yes, different instruction groups produce a change in average time. The **row group had a higher average completion time than the corner group**.
+
+2.  No, after computing the Pearson's product-moment correlation coefficient, we can conclude that **Completion Time is not affected by Field Dependence or EFT**.
+
+# Recommendations
+
+The experiments were conducted on only 24 children which is not a large enough data set to come to any conclusions. Depending on the method of data sampling, there could have been many biases introduced to the results of this experiment.
+
+\newpage

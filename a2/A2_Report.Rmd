@@ -1,0 +1,336 @@
+---
+title: "Assginment 2 Report, DATA 400"
+author: "Yohen Thounaojam, 56112204"
+subtitle: "Intructor: Dr. Spectrum Han"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+## Introduction
+
+This report is a part of Assignment 2 of DATA 400, 2021W2 at UBCO. It is composed of three parts (1 report each). Please refer to the Table of Contents for more information. 
+
+| Page        | Content     |
+| ----------- | ----------- |
+| 2           | Ex 3.5        |
+| 7           | Ex 4.1        |
+| 9           | Ex 4.3        |
+
+## Other Information
+
+- All R code used in this report can be found in the .Rmd file in the submission. Moreover, for the relevant portions of the report, the code has been *'echoed'* back into this PDF. 
+
+
+\newpage
+
+-----------------------------------------
+
+# Ex 3.5 from Chapter 3: EFT Data
+Page 66
+
+## Introduction 
+
+The data shown below in *Table 1.1* is from an experiment conducted on a sample fo 24 primary school children. Each child completed the *Embedded Figures Test* (EFT), which measures 'filed dependence', i.e., the extent to which a person can abstract the logical structure of a problem  from its context. 
+
+
+```{r, echo=FALSE}
+data("EFT", package = "HSAUR3")
+EFT[10:15,0:3]
+```
+**Table 1.1** 6/24 rows of EFT Data. **time** in seconds. 
+
+After each child completed the EFT, they were allocated to one of two experimental groups. The experiment asked the children to construct a 3x3 pattern from nine colored blocks, taken from the Wechsler Intelligence Scale for Children. 
+
+In this report, we will first perform some simple Exploratory Data Analysis to get an overall idea of the data. Then, we will consider certain methods to come to conlcusions of the data and try to answer the questions we are aiming for. 
+
+Later in the report, all the results of the analysis will be presented to come to a conclusion. 
+
+## Objective
+
+The two experimental groups were: *Corner* and *Row*. They differed in the instructions they were given for the task.
+
+1. The 'row' group were told to start with a row of three blocks.
+2. The 'corner' group were to start with a corner of three blocks.
+
+The goal of the experiment was to answer the following questions: 
+
+1. Did the different instructions produce any change in the average time to complete the pattern? 
+2. Was this time affected by field dependence?
+
+Next, let us look at some Expoloratory Data Analysis. 
+
+\newpage
+
+## Exploratory Data Analysis
+
+```{r, echo=FALSE}
+data("EFT", package = "HSAUR3")
+summary(EFT)
+```
+**Table 1.2** Summary of data in EFT dataset. 
+
+From **Table 1.2** we see that there are two groups of interest, *row* and *corner*. Now that we have an overall idea of the dataset, we can look at some basic Box and Q-Q plots below. 
+
+```{r, echo=FALSE}
+layout(matrix(c(1,2,1,3), nrow = 2, ncol = 2, byrow = TRUE))
+
+boxplot(time ~ group, data = EFT, 
+        xlab = "Instruction Group",
+        ylab = "Time in Seconds",
+        varwidth = TRUE)
+
+row <- EFT$group == "row"
+qqnorm(EFT$time[row],ylab = "Estimated Time (seconds)", xlab = "Theoretical Quantiles (Row)")
+qqline(EFT$time[row])
+
+qqnorm(EFT$time[!row],ylab = "Estimated Time (seconds)", xlab = "Theoretical Quantiles (Corner)")
+qqline(EFT$time[!row])
+```
+
+From this box plot above, we can infer the median values of the two groups of interest. Also, we see from the *Normal Q-Q plots* that the *Row* values follow a *Normal Distribution* but not the *Corner* values. 
+
+\newpage
+## Method
+
+To explain the methods of analysis used in this section, let us recall the questions we want answered. 
+1. Did the different instructions produce any change in the average time to complete the pattern?
+
+  - To answer this question, we will first need to calculate the average time of completion for each *instruction group* and then later compare it. 
+
+```{r, echo=TRUE}
+EFT_means <- aggregate(time ~ group, EFT, mean)
+```  
+
+2. Was this time affected by field dependence?
+  
+  - To answer this question, we can compute the **Pearson's Product-Moment Correlation Coefficient** to see if there is any significant correlation between the two variables, *time* and *EFT*. 
+  
+
+## Results - Did the different instructions produce any change in the average time to complete the pattern?
+
+In the plot below, we will use the *mean* values we calculated and plot them to answer Question 1. 
+
+```{r, echo=FALSE}
+plot(as.factor(EFT_means$group), EFT_means$time, xlab= "Instruction Group", ylab="Average Time in Seconds", main="Avergae Time (seconds) for Row and Corner")
+```
+
+Here, it is clear that the instruction type changed the result ever so slighly, by ~50 seconds. Instruction Group of *row* **has a higher avergae completion time**. 
+
+\newpage
+## Results - Was this time affected by field dependence?
+
+Next, let us compute the Pearson's product-moment correlation coefficient. 
+
+```{r, echo=FALSE}
+cor.test(~ time + EFT, data = EFT)
+# summary(water)
+```
+
+A correlation coefficient of **0.547** implies only a very slightly **moderate/medium correlation**. This is not significant enough to say the **EFT** affected the **average completion time**. 
+
+This can further be proven by the plot below. 
+
+```{r, echo=FALSE}
+groups <- as.numeric(EFT$group)
+plot(time ~ EFT, data = EFT, pch=groups, main="Scatter Plot: time ~ EFT")
+legend("topleft", legend = levels(EFT$group),
+       pch = c(1,2), bty = "n")
+```
+
+\newpage
+
+## Discussions and Conclusion
+
+The conclusions of this analyses are short and can be answered in just two lines: 
+
+1. Yes, different instruction groups produce a change in average time. The **row group had a gigher average completion time than the corner group**. 
+
+2. No, after computing the Pearson’s product-moment correlation coefficient, we can conclude that **Completion Time is not affected by Field Dependence or EFT**.
+
+## Recommendations
+1. The experiments were conducted on only 24 children which is not a large enough dataset to come to any conclusions. Depending on the method of data sampling, there could have been many biases introduced to the results of this experiment. 
+
+
+\newpage
+
+-----------------------------------------
+
+# Ex 4.1 from Chapter 4: orallesions data
+Page 66
+
+## Introduction 
+
+The data shown below in *Table 2.1* gives the distribution of the oral lesion site found in house-house surveys in three geographic regions of rural India. 
+
+```{r, echo=FALSE}
+data("orallesions", package = "HSAUR3")
+orallesions
+```
+**Table 2.1** orallesions dataset. 
+
+## Objective
+
+As laid out in the exercise, this report aims to find:
+
+1. The p-value from Fisher's Test and the corresponding *p*-value from Fisher's test.
+2. Corresponding *p*-value from applying the usual chi-square test of the data. 
+
+## Exploratory Data Analysis and Preparation
+
+Since the aim of the exercise is clear and short, we do not need to perform EDA. 
+
+\* *Please see the next page for results.*
+
+\newpage
+
+## Results
+
+**Fisher's Test**
+
+```{r}
+fisher.test(orallesions)
+```
+
+**Chi-Square Test**
+
+```{r}
+chisq.test(orallesions)
+```
+
+## Discussions and Conclusion
+
+- p-value from Fisher's Exact Test = 0.01904
+- p-value from Chi-Square Test = 0.1096
+
+**We see that the p-value we computed using the Chi-Square Test is significant while the p-value from the Fisher's Exact Test is not. **Looking back at the difference between the two tests, we might be able to come to come conclusions. 
+
+We know that the Chi-Squared test is used to compare the distribution of a categorical variable in a sample or a group with the distribution in another. It also relies on *approximation* while Fisher's Test is *exact*. 
+
+So we must be careful about which test we use depending on the *sample size* and the *accuracy* we want. 
+
+In conclusion, since the dataset in question is arguably small, we must look at the p-value obtained from Fisher's and conlcude that it is not significant. 
+
+\newpage
+
+-----------------------------------------
+
+# Ex 4.3 from Chapter 4
+Page 66
+
+## Introduction 
+
+In this exercise, we will generate two groups with measurements following a normal distribution but having different means. Later compare the p-values we compute with two tests, the Wilcoxon Mann-Whitney rank sum test and a permutation test (using independence_test).
+
+## Objective
+
+The goal of this exercise is to compare the p-values of the mentioned test over multiple replications of the experiment, a 1000 or so. 
+
+Next, we find out where the differences come from. 
+
+## Method
+
+First, we show a sample generation of the data below using **rnorm**, meaning it will have a normal distribution.  
+
+```{r, echo=TRUE}
+library("coin")
+
+sample_data <- data.frame(
+  score = rnorm(20),
+  sex = as.factor(c(rep("Girl", 10), rep("Boy", 10)))
+)
+
+summary(sample_data)
+```
+
+Next, let us check the means:
+
+```{r}
+aggregate(score ~ sex, sample_data, mean)
+```
+
+## Results
+
+Below is the method in which we will perform the tests:
+
+```{r, echo=TRUE}
+wilcox.test(sample_data$score ~ sample_data$sex)
+
+independence_test(sample_data$score ~ sample_data$sex, distribution = exact())
+```
+
+Next, let us look at replication of the above over 1000 times. 
+
+```{r, echo=TRUE}
+library("coin")
+
+# Create empty list to append p_values of 1000 replications
+w_values <- rep(NA, 1)
+i_values <- rep(NA, 1)
+
+# Loop over 1000 times
+for (x in 1:1000) {
+  
+  #Create sample data
+  sample_data <- data.frame(
+    score = rnorm(20),
+    sex = as.factor(c(rep("Girl", 10), rep("Boy", 10)))
+  )
+
+  # Extract p_calues from each test
+  w_pValue <- wilcox.test(sample_data$score ~ sample_data$sex)$p.value
+  i_pValue <- pvalue(independence_test(sample_data$score ~ sample_data$sex
+                                       , distribution = exact()))
+  
+  # Append the p_values to the above lists
+  w_values <- c(w_values, w_pValue)
+  i_values <- c(i_values, i_pValue)
+} 
+```
+
+\newpage
+
+We will perform some data cleaning. 
+
+```{r}
+# Remove NA value which we added to create empty list
+w_values <- w_values[!is.na(w_values)]
+i_values <- i_values[!is.na(i_values)]
+
+# Create DF of two lists
+p_values <- data.frame(
+  wilcox = w_values,
+  independence = i_values
+)
+```
+
+Below is the summary of the data obtained from the experiment. 
+
+```{r, echo=FALSE}
+# Generate Summary
+summary(p_values)
+```
+
+To look further into it an get a general idea, let us look at a boxplot of the two tests' p-values. 
+
+```{r, echo=FALSE}
+boxplot(p_values, main="Boxplot of experiment data")
+```
+
+
+## Discussions and Conclusion
+ 
+As shown in the box plot and the summary of the data collected when repeated over 1000 times, the mean p-values are different.
+
+The differences come from the fact that **Wilcoxon rank-sum test is not a test for differences in the mean while the permutation test is a permutation test for differences in the mean**, and we recall from the Methods section, each sample from the 1000 repetitions have difference mean values.  
+
+
+\newpage
+
+## Acknowledgements
+**Data Source: ** HSAUR3 | *[Link: Documentation](https://cran.r-project.org/web/packages/HSAUR3/index.html)*
+
+## References
+Question from the A Handbook of Statistical Analyses Using R |  *[Link](https://www.google.ca/books/edition/A_Handbook_of_Statistical_Analyses_using/cuTMAwAAQBAJ?hl=en&gbpv=1&dq=HSAUR3&printsec=frontcover)*

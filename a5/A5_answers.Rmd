@@ -1,0 +1,346 @@
+---
+title: "Assginment 5 Report, DATA 400"
+author: "Yohen Thounaojam, 56112204"
+subtitle: "Intructor: Dr. Spectrum Han"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+\newpage
+
+## Q1.
+
+### Definitions:
+
+- A **leverage point** is an observation that has an unusual predictor value (very different from the bulk of the observations).
+- An **influence point** is an observation whose removal from the data set would cause a large change in the estimated regression model coefficients.
+
+Since the location of points in x space determines their leverage on the regression model, which is measured by the diagonal elements $h_{ii}$ of the hat matrix $\mathbf{H} = \mathbf{{X}(X'X)^{-1}X'}$ where $h_{ii} = \mathbf{x'_i(X'X)^{-1}x_i}$ it is traditionally assumed that any observation $x_i$ with
+
+$$
+h_{ii} > 2\overline{h}=2(k+1)/n
+$$
+is remote enough to be considered a leverage point. 
+
+
+Influence Points can be calculated for any given model using Cook's Distance. The formula is: 
+
+$$
+D_k = \frac{1}{(q+1)\hat{\sigma}^2}\sum_{i = 1}^{n}{(\hat{y}_{i(k)} - y_i)^2}
+$$
+
+\newpage
+
+## Q2.
+
+### Importing Data
+
+```{r, echo=FALSE}
+# Importing the data
+data("p2.12", package = "MPV")
+temp_data <- p2.12
+```
+
+```{r, echo=FALSE}
+print(temp_data)
+```
+
+### Data Description
+
+From the table above, we see that the p2.12 data frame has 12 observations on the number of pounds of steam used per month at a plant and the average monthly ambient temperature.
+
+This data frame contains the following columns:
+
+-   **temp**: ambient temperature (in degrees F)
+-   **usage**: usage (in thousands of pounds)
+
+### Analysis and Results
+
+Let us perform a Linear Regression to analyze the relationship between Temperature and Usage. The following are the results: 
+
+```{r, echo=FALSE}
+usage_lm <- lm(usage ~ temp, data = temp_data)
+summary(usage_lm)
+```
+**Table 1. Results of Linear Regression**
+
+\newpage
+
+Now, let us create a plot of the regression line. 
+
+```{r, echo=FALSE, fig.cap = "Linear Regression of Usage and Temp"}
+plot(usage ~ temp, data = temp_data)
+abline(usage_lm)
+```
+
+In *Figure 1*, we notice a clear positive linear correlation between *temp* and *usage*. Now looking at the output from our Linear Regression model:
+
+- Intercept: -6.33209
+- Slope: 9.20847
+
+```{r, echo=FALSE}
+Slope <- 0
+Intercept <- 0
+x <- 0
+temp <-0
+```
+
+Using the values above, we can form the following equation to represent the relationship between *temp* and *usage* from the following equation of a line:
+$$
+y = m*x+b
+$$
+
+Now, m is the Slope and b is the Intercept, so,
+
+$$
+y = Slope * x + Intercept
+$$
+$$
+y = 9.20847 * x - 6.33209
+$$
+$$
+usage = 9.20847 * temp - 6.33209
+$$
+
+### Hypothesis Testing
+
+Let, $\alpha$=0.05. 
+
+Our null and alternate hypothesis are:
+$$
+H_0: m=0;\ there\ is\ no\ relationship\ between\ x\ and\ y,\ therefore\ slope\ m = 0.
+$$
+$$
+H_1:m \neq 0;\ there\ is\ a\ relationship\ between\ x\ and\ y,\ therefore\ slope\ m \neq 0. 
+$$
+
+Now from *Table 1*, we see that the $p-value < 0.0001 $; hence, $p-value < \alpha$. Therefore, we reject the null hypothesis $H_0$. 
+
+
+### Regression Diagnostics
+```{r, echo=FALSE, fig.cap="Residual Plot of Linear Regression Model"}
+plot(usage_lm, which =1)
+```
+
+In *Figure 2*, where the Fitted Values are plotted against the Residuals, we observe the following:
+
+1. The residuals are randomly and evenly distributed.
+2. They are clustered around the horizontal band. 
+3. We notice a possible outlier, data-point $12$.
+
+After considering all of the above, we can conclude that our Linear Regression model used above is accurate and well-behaved. Furthermore, the $Adjusted\ R^{2}$ value of $0.999$, as this signifies that the *temp* explains 99% of the variation of *usage* values. 
+
+# Q3.
+
+```{r, echo=FALSE}
+data("table.b3", package = "MPV")
+gas_data <- table.b3
+```
+The *table.b3* data frame has observations on gasoline mileage performance for 32 different auto- mobiles. This data frame contains the following columns:
+
+- $y$: Miles/gallon
+- $x1$: Displacement (cubic in)
+- $x2$: Horsepower (ft-lb)
+- $x3$: Torque (ft-lb)
+- $x4$: Compression ratio
+- $x5$: Rear axle ratio
+- $x6$: Carburetor (barrels)
+- $x7$: No. of transmission speeds
+- $x8$: Overall length (in)
+- $x9$: Width (in)
+- $x10$: Weight (lb)
+- $x11$: Type of transmission (1=automatic, 0=manual)
+
+### Analysis 1 
+
+```{r, echo=FALSE}
+gas_model1 <- lm(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11, data = gas_data)
+summary(gas_model1)
+```
+**Table 2. $gasModel_1$: Full Multiple Linear Regression on Gas Data**
+
+\newpage
+Now, we will plot the residual and QQ-Norm plots. 
+
+```{r, echo=FALSE, fig.cap = "Diagnostic Plots of Multiple Linear Regression of Gas Data"}
+# plot(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11, data = gas_data)
+# abline(gas_model1)
+
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
+plot(gas_model1)
+```
+
+### Results 1
+
+The goal of this question to fit a multiple linear regression model. To start off, the $p-values$ of all the variables are very insignifcant for the model to be considered. This could be solved by keeping only a few variables with significant $p-values$. 
+
+After diagnostic checking using residual and QQ-Norm plots, we will fit another model using only the $x5, x8, x10$ variables. Then we will compare the two models. 
+
+From the *Residuals vs Fitted* plot in *Figure 3*, we see that the data has multiple outliers and also has a cluster below the $25$ value on the x-axis. Also, from the *QQ-Norm plot* in the same figure, we notice that the data does follow a normal distribution. 
+
+### Analysis 2
+
+As instructed by the quesiton, we will now use only the $x5, x8, x10$ variables in the regression model. Then, we ill compare the results with those from **Results 1**
+
+\newpage
+
+```{r, echo=FALSE}
+gas_model2 <- lm(y ~ x5 + x8 + x10, data = gas_data)
+summary(gas_model2)
+```
+**Table 3. $gasModel_2$: Multiple Linear Regression on Gas Data with **$x5, x8, x10$ **variables.** 
+
+Now, we will plot the residual and QQ-Norm plots. 
+
+```{r, echo=FALSE, fig.cap = "Diagnostic Plots of Multiple Linear Regression of Gas Data"}
+# plot(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11, data = gas_data)
+# abline(gas_model1)
+
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page
+plot(gas_model2)
+```
+
+### Results 2
+
+From *Table 3*, we find that all three variables have statistically significant $p-values$ for $\alpha=0.05$. 
+
+Furthermore, in *Figure 4 - Residuals vs Fitted* plot, we see that all residual values are randomly and equally distributed. On top of that, the QQ-Norm plot in the same figure shows a hihgly normal distribution of the data. ALl of these combined show a reliable linear regression model.  
+
+### Comparison of Results
+
+
+#### Numeric:
+In *Analysis 1*, p-values of the variables used in the linear regression model ($gasModel_1$) did not show significance (except for $x5$). However, in *Analysis 2*, we see that all the p-values used in the model ($gasModel_2$) are statistically significant for $\alpha=0.05$. 
+
+
+#### Graphical:
+Here, our main focus is on two graphs in particular: *Residuals vs Fitted* & *QQ-Norm*. In $gasModel_1$ from *Figure 3*, clusters are formed in the *Residual vs Fitted* plot. However, in $gasModel_2$ from *Figure 4 - Residuals vs Fitted* plot, we see that all residual values are randomly and equally distributed. This means that the variables used in $gasModel_2$ form a better model. 
+
+When looking at the Nornaml Q-Q plots of the two models. We see a better fitting plot for $gasModel_2$ in *Figure 4 - Normal Q-Q* to the normal distribution.  
+
+#### Preference:
+From our comparison of the two models, $gasModel_1$ and $gasModel_2$, it is clear that $gasModel_2$ is better preferred because: 
+
+1. The model shows higher significance of $p-value$. 
+2. Residual Plot shows better random distribution of the residual values without any clusters. 
+3. Shows a better normal distribution in the Normal Q-Q plot. 
+
+\newpage
+
+# Q4.
+
+The goal of the question is to generate the $ANOVA$ table of the data in Table 5.1 in the TextBook using the linear regression model. So, let us first import the dataset. 
+
+```{r}
+data("weightgain", package = "HSAUR3")
+```
+
+Next, we will perform Linear Regression and then use the $anova()$ function to generate the $ANOVA$ table. 
+
+```{r}
+weightgain_lm <- lm(weightgain~source+ type, data=weightgain)
+anova(weightgain_lm)
+```
+
+#### Explanation:
+When we perform an Analysis of Variance, categorical data such as the one in *weightgain* data set are coded with 1's and -1's so that each catrgory's mean is compared to the grand mean. However, in regression, the categorical variables are dummy coded, which means that each variable's intercept is compared to the reference group's intercept. To check this, we will use the $aov()$ function wihtout linear regression to confirm the correctness of our result above. 
+
+```{r}
+aov(weightgain~ source+ type, data=weightgain)
+```
+
+\newpage
+
+# Q5.
+
+```{r, echo=FALSE}
+data("hubble", package = "gamair")
+```
+
+Removing the galaxies having leverage higher than 0.8. To do so, we will simply set the weights of the data points with leverage higher than 0.8 to 0 and update the mode. 
+
+First, let us generate a zero intercept linear model of the galaxy data: 
+```{r}
+galaxy_model <- lm(y ~ x-1, data=hubble)
+print(coef(galaxy_model))
+```
+
+Now, we will find data points with *leverage > 0.8* using *cooks.distance()*. Then, we will remove those data points from the data set and re-generate out zero intercept linear model. 
+
+```{r}
+high_leverage <- hatvalues(galaxy_model) > 0.08
+hubble2 <- hubble[!high_leverage,]
+galaxy_model <- lm(y ~ x-1, data=hubble2)
+print(coef(galaxy_model))
+```
+
+Lastly, we will perform the unit conversion below (referred from pg. 109 of HSAR) and calculate the new age of the universe. 
+
+```{r}
+Mpc <- 3.09*10^19
+ysec <- 60^2 * 24 * 365.25
+Mpcyear <- Mpc/ ysec
+1/(coef(galaxy_model)/Mpcyear)
+```
+
+So, the new age is $13037418512 $ years. Or, $13.04\ billion$ years old.  
+
+\newpage
+
+# Q6.
+
+### Data Description
+
+
+Data on distances and velocities of 24 galaxies containing Cepheid stars, from the Hubble space telescope key project to measure the Hubble constant.
+
+A data frame with 3 columns and 24 rows. The columns are:
+
+- Galaxy: A (factor) label identifying the galaxy.
+- y: The galaxy’s relative velocity in kilometers per second.
+- x: The galaxy’s distance in Mega parsecs. 1 parsec is 3.09e13 km.
+
+```{r, echo=FALSE}
+# Simple
+hubble_linear <- lm(y ~ x, data=hubble)
+# Quadratic
+hubble$x2 <- hubble$x^2
+hubble_quad <- lm(formula = y ~ x + x2, data=hubble)
+```
+
+### Plots (Linear and Quadratic)
+
+
+
+
+```{r, echo=FALSE, fig.cap="Regression Model fits on Scatter Plot for Linear and Quadratic"}
+layout(matrix(1:2, ncol=2))
+# Linear Plot
+plot(y ~ x, data = hubble,  main="Linear Regression Fit")
+abline(hubble_linear, col='blue')
+# Quad
+plot(y ~ x, data = hubble,  main="Quadratic Regression Fit")
+lines(sort(hubble$x), fitted(hubble_quad)[order(hubble$x)], col='red') 
+```
+
+
+\newpage
+
+### Which is better?
+
+Just from looking at *Figure 5* and the scatter plot of the data points, we can see that the Quadratic Regression has a better fit for the data as it accounts for the data's non-linear behavior. This can also be confirmed in *Figure 6.a* as we see a cluster/patch of many positive residuals in the middle.  
+
+
+```{r, echo=FALSE, fig.cap="Top: Linear Model, Bottom: Quadratic Model"}
+layout(matrix(1:2, nrow=2))
+plot(hubble_linear, which =1, main = )
+plot(hubble_quad, which =1, main = )
+```
+
+
+
+
+

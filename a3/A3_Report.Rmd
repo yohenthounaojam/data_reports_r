@@ -1,0 +1,226 @@
+---
+title: "Assginment 3 Report, DATA 400"
+author: "Yohen Thounaojam, 56112204"
+subtitle: "Intructor: Dr. Spectrum Han"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(plm)
+```
+## Introduction
+
+This report is a part of Assignment 2 of DATA 400, 2021W2 at UBCO. It is composed of two parts (1 report each). Please refer to the Table of Contents for more information. 
+
+| Page        | Content     | Data Used |
+| ----------- | ----------- |---| 
+| 02          | Question 1 | *rice* data        |
+| 06          | Ex 5.2 | *schooldays* data      |
+
+## Other Information
+
+- All R code used in this report can be found in the .Rmd file in the submission. Moreover, for the relevant portions of the report, the code has been *'echoed'* back into this PDF. 
+
+
+\newpage
+
+-----------------------------------------
+
+# Question 1: *rice* data
+
+## Introduction 
+
+The data shown below in *Table 1.1* is from an experiment conducted on the mass of plants (ShootDryMass) as a function of fertilizer and plant variety. 
+
+The treatments given to the plants had a two-way structure, but the plants were also grown in blocks chosen so that conditions are as similar as possible within each block. 
+
+```{r, echo=FALSE}
+data("rice", package = "DAAG")
+rice[30:44,0:7]
+```
+**Table 1.1** 15/72 rows of rice Data. 
+
+In the above table, each column is very self-explanatory. Each treatment combination occurred once per block. This kind of experiment is designed to take block effects into account but there should not be an interaction between block and treatment. 
+
+## Objective
+
+The goal of this analysis is to conduct a three-way ANOVA where there is an interaction between *variety* and *fert*, but no interaction with *Block*. 
+
+The questions we aim to answer are: 
+1. Are the treatment interactions significant?
+2. Obtain a useful summary of the treatment effects. 
+
+\newpage
+
+## Exploratory Data Analysis 
+
+Using the *summary* function, let us look at some EDA of the *rice* data. 
+
+```{r, echo=FALSE}
+data("EFT", package = "HSAUR3")
+summary(rice)
+```
+**Table 1.2** Summary of data in rice dataframe.
+
+```{r, echo=FALSE}
+# data("rice", package = "DAAG")
+# is.pbalanced(rice)
+```
+
+## Method
+
+As instructed, we will be performing a Three-Way ANOVA on *variety, fert* and *Block*. 
+
+```{r, echo=TRUE}
+rice_aov <- aov(ShootDryMass ~ fert + variety + Block + fert:variety, data=rice)
+summary(rice_aov)
+```  
+**Table 1.3** AOV of interaction between variety and fert, but no interaction with Block.
+
+We see that there was a statistically significant interaction between **variety** and **fert** for the **ShootDryMass**
+
+\newpage
+
+
+## Results 
+
+To further understand the output we saw in detial, we will use the *Tukey honest significant differences* to perform multiple pairwise comparisons between *fert*.  
+
+```{r}
+TukeyHSD(rice_aov, "fert")
+```
+**Table 1.4** TukeyHSD of AOV from Table 1.3.
+
+Here, we see that two differences in the *fert* variable is significant:
+
+1. Between NH4NO3-F10 (adjusted p-value = 0.018)
+2. Between NH4NO3-NH4Cl (adjusted p-value = 0.0001)
+
+Since the experiment is a Balanced Complete Block Design (BCBD), we can summarize the AOV results below: 
+
+```{r}
+model.tables(rice_aov, "means", se = TRUE)
+```
+**Table 1.5** Model Summary of AOV from Table 1.3 
+
+## Discussions and Conclusion
+
+A three-way ANOVA was performed to test the interaction between variety and fert, but no interaction with Block.
+
+A very significant interaction was found between *variety* and *fert*. This means that both variables introduce significant variablibity on the mass of the plants. Further analysis of the *fert* variable shows us that interactions between NH4NO3 and F10, and, NH4NO3 and NH4Cl are significant showing evidence for a difference in the 4 types of *fert*. 
+
+\newpage
+
+-----------------------------------------
+
+# Ex 5.2 from Chapter 5: *schooldays* data
+Page 66
+
+## Introduction 
+
+The data shown below in *Table 2.1* is from a sociological study of Australian Aboriginal and white children. In this study, children of both sexes from the following four age groups and from two cultural groups were used: 
+- Final grade in primary schools
+- First Grade in Secondary School
+- Second Grade in Secondary School
+- Third Grade in Secondary School
+
+The response variable was the number of days absent from school. 
+
+```{r, echo=FALSE}
+data("schooldays", package = "HSAUR3")
+is.pbalanced(schooldays)
+# schooldays
+schooldays[70:79, 0:5]
+```
+**Table 2.1** schooldays dataset. 
+
+## Objective
+
+As laid out in the exercise, the goal is to carry out an appropriate *Analysis of Variance* of the data. 
+
+\newpage
+
+## Exploratory Data Analysis and Preparation
+
+In the exercise, we are told that: 
+
+- The data is unbalanced. 
+- The response variable is a count. 
+
+Let us begin the analysis with a plot of the mean absent days for each of the four factors, shown in *Fig. 2.1*. 
+
+```{r echo=FALSE}
+plot.design(schooldays)
+```
+**Fig 2.1** Plot of mean absent days for each factor: race, gender, school and learner. 
+
+
+From *Fig 2.1*, we can see that the differences in *Number of Days Absent* for its corresponding types are significant for **race** and **school**, but not so much for *gender* and negligible for *learner* type. Hence, we are going to perform AOV for the interactions between race, school and gender. 
+
+
+\newpage
+
+## Method
+We know that the unbalanced nature of the data brings some complications while performing an AOV since it is no longer possible to partition the variation in the data into non-overlapping sums of squares representing interactions. Let us derive a few Analyses of Variance tables. 
+
+```{r, echo=TRUE}
+summary(aov(absent ~ race*gender*school, data = schooldays))
+summary(aov(absent ~ school*race*gender, data = schooldays))
+summary(aov(absent ~ gender*school*race, data = schooldays))
+```
+**Table 2.2** AOV's taking factors in different orders. 
+
+As you can see in *Table 2.2*, there are differences in the sum of squares for certain factors and consequently, in the associated F-tests and p-values. This confirms the unbalanced nature of the data. 
+
+Moreover, we notice that there is always a consistent significant interaction (p < 0.05) between *race* and *school*; complementing our finding from the EDA previously done.  
+
+
+## Results
+
+
+As seen in the section above, the *unbalanced* nature of the data would not allow us to use just an ANOVA. Hence, we will be using Tukey's ‘Honest Significant Difference’ method followed by graphical representation of the multiple confidence intervals for *School* and *race*. 
+
+**School Variable**
+```{r, echo=FALSE}
+schooldays_aov <- aov(absent ~ race*gender*school*learner, data = schooldays)
+schooldays_hsd <- TukeyHSD(schooldays_aov, "school")
+schooldays_hsd
+```
+
+```{r, echo=FALSE}
+plot(schooldays_hsd)
+```
+
+From the above results (Tukey and Plot), we see that there is high difference in mean values but none of them are significant enough. Next, let us look at the case for race. 
+
+\newpage
+
+**Race Variable**
+```{r, echo=FALSE}
+schooldays_aov <- aov(absent ~ race*gender*school*learner, data = schooldays)
+schooldays_hsd <- TukeyHSD(schooldays_aov, "race")
+schooldays_hsd
+```
+
+```{r, echo=FALSE}
+plot(schooldays_hsd)
+```
+
+In the case of *race*, we see a high difference in means between the two recorded races. However, the more important take-away is that this is **highly significant** with a p-value of 0.0004. In the next section, we will explore ideas and reasoning behind the influence of race on the number of days absent. 
+
+\newpage
+## Discussions and Conclusion
+
+We conclude that there is a high dependence of the *'number of days absent'* on the race of the child (aboriginal or non-aboriginal). We also saw some dependence on the *school* variable. 
+
+Going back to *Fig. 2.1*, it makes sense that the *race* of the children introduces high variability in the data as we saw a high difference in mean absent days. This also supports reports of the  Australian Institute of Health and Welfare report in 2018 on family, domestic and sexual violence in Australia; which states that **Aboriginal Australians had increased risk factors for family violence, such as poor housing and overcrowding, financial difficulties, low education and unemployment.**
+
+The above claims (*[Link: see News.com report](https://www.news.com.au/national/the-truth-about-how-aboriginal-people-are-treated-in-australia/news-story/b6f63cbe1c7db3209141de328ba47795)*) can be a possible explanation to why aboriginal children are missing school more than their non-aboriginal counterparts.
+
+
+## Acknowledgements
+**Data Source: ** HSAUR3 | *[Link: Documentation](https://cran.r-project.org/web/packages/HSAUR3/index.html)*
+
+## References
+Question from the A Handbook of Statistical Analyses Using R |  *[Link](https://www.google.ca/books/edition/A_Handbook_of_Statistical_Analyses_using/cuTMAwAAQBAJ?hl=en&gbpv=1&dq=HSAUR3&printsec=frontcover)*
